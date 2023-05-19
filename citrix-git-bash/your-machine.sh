@@ -3,9 +3,18 @@
 
 set -euo pipefail
 
-declare -r BASTION='54.200.185.166'
+readonly CONF_DIR="$HOME/.local/ssh-tunnel"
+readonly BASTION_CONFIG="$CONF_DIR/bastion.ipaddr"
+
+BASTION=''
 
 function main {
+  ensure_config
+
+  info "Loading bastion IPv4 from $BASTION_CONFIG"
+  BASTION="$(cat "$BASTION_CONFIG")"
+  validate_ip_addr "$BASTION"
+
   local action=''
   declare -a all_args=()
 
@@ -36,6 +45,39 @@ function main {
   fi
 }
 
+function ensure_config {
+  mkdir -p "$CONF_DIR"
+
+  # You might be able to do without a bastion if you open a port
+  # on your router at home. I generally don't like to do that,
+  # even though there might be less latency. I'd rather not have
+  # a network trail to my public IP.
+  #
+  # I recommend only using SSH keys that are encrypted with
+  # passwords. Just use `ssh-agent` if it's annoying to type each
+  # time, but that means there's no tunneling back from the remote
+  # machine unless someone with your key knows YOUR password.
+  if [ ! -f "$BASTION_CONFIG" ];then
+    >&2 printf 'Please enter the IPv4 address of your bastion host: '
+    read -r ipv4
+
+    # remove all whitespace
+    ipv4="$(tr -d "[:blank:]" <<< "$ipv4")"
+
+    validate_ip_addr "$ipv4"
+
+    printf '%s' "$ipv4" > "$BASTION_CONFIG"
+    info "Saved bastion host IPv4 address to $BASTION_CONFIG"
+  fi
+}
+
+function validate_ip_addr {
+  local ipv4="$1"
+  if ! grep -q -E '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$' <<< "$ipv4"; then
+    die "That doesn't look like an IPv4 address: [$ipv4]"
+  fi
+}
+
 function conn_up {
   # opens port 2200 on your machine and forwards traffic to port 2222
   # on the bastion's loopback interface.
@@ -49,7 +91,7 @@ function conn_up {
   ssh \
     -o 'StrictHostKeyChecking=no' \
     -o 'UserKnownHostsFile=/dev/null' \
-    ec2-user@$BASTION -fNT -L 2200:127.0.0.1:2222
+    ec2-user@"$BASTION" -fNT -L 2200:127.0.0.1:2222
 
   info "The tunnel should be up."
 }
