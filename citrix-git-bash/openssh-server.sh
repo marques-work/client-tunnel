@@ -82,7 +82,7 @@ function ensure_sshd_config {
     -e "s,^#HostKey /etc/ssh/ssh_host_ed25519_key,HostKey $HOST_KEY,g" \
     -e 's,^#AllowAgentForwarding yes$,AllowAgentForwarding yes,g' \
     -e 's,^#AllowTcpForwarding yes$,AllowTcpForwarding yes,g' \
-    -e 's,^#X11Forwarding yes$,X11Forwarding yes,g' \
+    -e 's,^#X11Forwarding no$,X11Forwarding yes,g' \
     -e "s,^#PidFile /etc/ssh/sshd.pid,PidFile $CONFIG_DIR/sshd.pid,g" \
     "$SSHD_CONFIG_DEFAULT" > "$SSHD_CONFIG"
 }
