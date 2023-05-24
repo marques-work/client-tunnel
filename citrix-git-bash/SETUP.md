@@ -8,7 +8,16 @@ Use a cloud provider or other machine _**you**_ control/own. For instance, use y
 
 Or use GCP or whatever you have.
 
-### Pre-req: configure `ssh-agent` and create a new password-encrypted ssh keypair
+### Pre-req: configure `ssh-agent` and create a new password-encrypted ssh keypair on the target windows machine
+
+0. Download a tarball of this repo: [main.tar.gz](https://github.com/marques-work/client-tunnel/archive/refs/heads/main.tar.gz)
+    - Extract somewhere:
+
+        ```console
+        $ tar zxf path/to/main.tar.gz
+        ```
+
+    - Optional, but recommended: put these scripts in your `PATH`
 
 1. Open a `git+bash` terminal session
 2. Ensure `ssh-agent` is enabled in your session:
@@ -78,9 +87,8 @@ Or use GCP or whatever you have.
 
 ### From the remote windows machine:
 
-1. (Optional, but recommended) put these scripts in your `PATH`
-2. Open a `git+bash` terminal session
-3. Add the ssh key you generated earlier in the prerequisites section to the `ssh-agent`:
+1. Open a `git+bash` terminal session
+2. Add the ssh key you generated earlier in the prerequisites section to the `ssh-agent`:
 
     ```console
     # assuming you chose the default location to save the key
@@ -90,7 +98,7 @@ Or use GCP or whatever you have.
     # shell session
     ```
 
-4. Start OpenSSH server by running the [`openssh-server.sh`](./openssh-server.sh) script:
+3. Start OpenSSH server by running the [`openssh-server.sh`](./openssh-server.sh) script:
 
     ```console
     $ ./openssh-server.sh start
@@ -99,7 +107,7 @@ Or use GCP or whatever you have.
     # alias for `restart`, which is what it really does.
     ```
 
-5. Run [`target-machine.sh`](./target-machine.sh):
+4. Run [`target-machine.sh`](./target-machine.sh):
 
     ```console
     $ ./target-machine.sh --up
